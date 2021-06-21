@@ -1,0 +1,205 @@
+MicroServices:
+.............
+
+Distributed Computing:
+
+
+What is Distributed Computing?
+
+Distributed computing (or distributed processing) is the technique of linking together multiple computer servers over a network into a cluster, to share data and to coordinate processing power. Such a cluster is referred to as a “distributed system.
+
+
+Application: 
+
+1.Data
+2.How to process data
+3.How to store data
+4.How to display data - User Interfaces
+
+Pl: represent,process,store,prepare data.
+
+PL used to build application, it was packed into one single package.
+
+Layers
+
+1.Service - Biz logic
+2.DataSource -  connectors to connect databases
+3.Presentation  -UI
+
+Types of Distributed?
+
+1.Main frame based
+   -Data access logic / Data sources
+   -biz logic 
+every thing kept inside one single maiframe
+thin 
+  clients - having small software which connects main frameworks
+
+client -server 
+
+  Server will hold data only -data source/database
+  Client will hold biz logic + UI
+
+Tier /layered client- server model
+......................................
+
+ -single tier
+   Server will hold data only -data source/database
+   Client will hold biz logic
+
+ -two tier client-server
+    server will have biz logic and data
+    clients will have only user interfaces
+
+ - three tier client-server arch 
+      
+     server will have biz logic   : App Servers
+     Server will have data  :Database Servers
+     client will have biz logic - user interface  +biz logic  
+.............................................................LAN/MAN Based
+
+ N tier client-server arch : Web - Internet Oriented
+
+1989 - AT CERN - To distribute Documents over internet.
+
+Documents: Collection of Information :Information is nothing but collection of data.
+
+Web Tech Products:
+-HTML
+-WebServer
+-line mode browser 
+-HTTP
+
+1989 -1995   -- Static web
+
+1996  - Dynamic content Generation Technologies
+
+How to use web as "Biz System"
+
+1.CGI - COmmon Gate Way interface -  c / perl
+
+2.SUN - J2EE Spec
+
+3.MicroSoft - ASP
+
+
+Dynamic content Generation Technology and Java:
+...............................................
+
+In DCG Technoloy: Application was broken into layers:On what basis you can break app.
+
+N-Tier Arch: java-J2EE Tech
+
+MVC - Model(data) ,View(Presentation)- C-Controller  + Data Processing Layer(Service) + Data Access Layer(DAO).
+
+DOMAIN:
+.......
+
+OrderManagement System
+
+In olden days , people though Technology FIRST - JAVA/J2EE : Monolithic
+
+Waterflow : 
+
+Team: OMS - PM- More PLS
+1. DEV
+2. TESTING
+3. RELEASE
+4. OPERATIONS
+
+1.Req
+2.Design
+   High Level-UML,Database
+   Low level - Runtime,databases,tools......
+3.coding
+
+-Vendor-lock in : Mono-lithic
+   -DEV,TESTING,PRODUCTION.
+-Work flow is highly sequencial
+   Req -Complete
+   Dev
+   testing
+   Release
+   Production
+  Delay in delivery:Cost increased
+-Production cost was huge
+
+ Data Centers
+ -need to purchase high powered servers - bare metal servers
+ 
+Cost:
+   -Hardware
+   -OS -Linux-Ubuntu
+   -Tools -Servers,databases etc....
+   -Matrix Hell -  Mapping software components in dev and Production..
+
+How to build enterprise jee based app.
+
+App  must support a variety of different clients including desktop browsers. 
+
+The application might also expose an API for 3rd parties to consume.
+
+It might also integrate with other applications via a message broker. 
+
+The application handles requests (HTTP requests and messages) by executing business logic; 
+
+accessing a database; 
+
+exchanging messages with other systems;
+
+and returning a HTML/JSON/XML response. 
+
+There are logical components corresponding to different functional areas of the application.
+
+............................................................................................
+
+IF App needs to talk to external systems like Message Brokers, other Systems like Main frameMain frameworks.
+
+RPC/RPI
+MOM
+Connectors Arch.
+
+BIZ LOGIC:
+
+1- Service Layer : isloate service layer into separate component
+
+ can be inside one app - one layer, that layer may run on different jvms -  distributed Arch.
+
+
+Layer :
+
+ Client ---- Web Layer  ----Service Layer ---- Repository Layer
+
+Packaging Model:
+ 
+WAR - Web archive
+EAR .
+
+Problems with Single JAR/WAR:
+
+1. Scalability
+ Vertical scablitity
+ Horzitional scability 
+
+2.Deployments
+    -Bare Metal Deployment
+
+*********************************************************************************************
+Any system, you need to think DOMAIN FIRST - PROBLEMS Oriented Design:MicroService
+
+DOMAIN DRIVEN DESIGN.
+Agile
+
+
+
+
+
+
+
+
+
+
+
+
+
+
