@@ -188,7 +188,321 @@ Problems with Single JAR/WAR:
 Any system, you need to think DOMAIN FIRST - PROBLEMS Oriented Design:MicroService
 
 DOMAIN DRIVEN DESIGN.
+ Bounded Context: Natural Language  way of expressing  Problems
+
+ Craft a language to crisply express a set of problems and their solutions at all levels from domain expert discussions through code.
+
+Bounded Context ===Subdomain===Organization
+
 Agile
+  _parallel dev, relase,Dev
+
+Team :
+ Multi SubDomains
+ For each domain
+    -pm,pls,dev,tester,operations(devops),release,production.
+
+OrderManagement
+
+ -Orders 
+
+ -Product
+
+ -Inventory
+
+ -Billing
+
+Technology Stack.
+  
+  You can select any technology or frameworks,libs for each domains
+
+  Orders 
+    -Java , Mongodb
+
+  Billing
+    -C# , MySql
+ 
+Testing Stack could be any thing.
+
+............................................................................................
+
+Automation: CI AND CD
+
+Automation must be every where.
+
+ From Dev to Production, must be automated
+
+
+Deployment:
+
+In Premises
+ - bare
+ -vms
+ -containers
+
+Cloud Deployment
+  -vms
+  -containers
+/////////////////////////////////////////////////////////////////////////////////////////////
+                                  Micro Services Design Pattern
+
+
+Implementation Patterns:
+........................
+
+1.DOMAIN Models
+  Decompose by biz features
+  Decompose by sub domains
+
+2.Devlopment
+  -Object oriented Design
+   Class
+      -Represent something in domain eg :Order,Customer
+   Service
+     -Offerings : giving something to somebody.
+   A Program offers something - Data
+
+   Services can be broken into smllar and smallar based on domains
+   Telecom domain :
+       Telecommunication Services
+		-Data Service
+			- Mobile data
+			- Broad Band
+			    -Fiber
+                            -leased Line
+    
+    
+    FiberOpticService
+        -getSpeed - 
+        -increaseSpeed-
+        -getNewConnection-
+        -disconnectExisingConnection() 
+        -payBills()    
+
+   BillingService
+	generateBill
+	processPayment
+	sendBill
+        adjustBill
+  
+   How to design a Service? 
+	USING SOLID Principles
+
+  Single-responsibility principle -SRP
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Service Communications:
+ 
+   Two Domains are going to collbrate each other to carry a biz transaction.
+
+
+In Micro Services
+
+
+FiberOpticService
+     is 
+   Running 
+     inside
+ One Application
+       |
+     Runtime
+       |
+  VM -Container
+
+      OS
+ 
+     |
+     |   data
+     |
+
+Billing is Running
+     is 
+   Running 
+     Another
+ One Application
+      |
+     Runtime
+       |
+  VM -Container
+
+      OS
+
+Class ----will be come  Objects
+
+Object Communication === Service Communication
+
+-SAME JVM(Runtime)
+  Calling methods from one object(FiberDataService) to another object (BillingService).
+-Different Runtime(JVM)
+   -Networks - Protocals
+    RestFull
+      -HTTP 
+   -RPC/RIP
+	-ORB
+        -RMI
+        -gRpc
+   -MOM - Message Brokers
+        RabbitMQ
+	Kaffka
+	etc...
+   -Event Bus
+	-TCP
+	
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Sevices Are Eagar or Lazy:
+.........................
+ 
+
+Eagar Service expects data immediatly.
+
+Service waits for data until it is received.The service cant continue other jobs ; 
+
+Sync Services
+
+Drawbacks:
+
+- Blocking 
+    It leads performance issues
+
+Service does not wait for data until it is received.The service t continue other jobs ; 
+
+Async Services
+
+Advantages
+ - Non Blocking
+    
+Async Services Implementation:
+..............................
+
+Two ways:
+
+1.Programmetic level 
+    -Netty,webflux,Quarkus
+
+2.Via Message Brokers
+    RabbitMQ,Kafka
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Service Failures:
+.................
+
+1.UnAvailability
+
+2.Timeout due to slow calls
+
+How to handle failures , how to return proper response to caller?
+
+Reliability Design patterns :fault tolerance 
+
+ -Circuit Breaker
+ -Bulk Head
+ -Rate Limiter
+ -Retry
+ -TimeLitmiter
+ -Cache
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Service Communications in network and its Problems:
+...................................................
+
+Services are going to talk each other.
+
+If they want to talk, What services should know each other?
+
+ -Location
+     ip address
+
+In monolithic(traditional) deployment - ip address , ports are well known (hardcoded)
+but in containers/ cloud env which are highly dynamic.
+
+Where Micro services typically runs in a virtualized or containerized envs , locations are highly.
+
+Services need to be registered some where and others services will ask registered location, that , hey give me that service
+
+Service Registry and Discovery Pattern:
+.......................................
+Service Registry:
+  -database - stores service informations
+
+Service Discovery:
+  locating services from the service registry
+
+Types of Service discovery:
+ -Client Side Service Discovery
+ -Server Side Service Discovery
+.............................................................................................
+
+Data Management :
+
+ A Service need to store data in data sources - Database
+  
+Database Per Service.
+
+ FiberOpticService
+Each service has its own schema. 
+you can have more than one tables per service
+
+Database: 
+  Collection of tables,views,other objects
+
+Shared Database:
+  Sharing db for more than one services .
+
+
+Service Communication and Data Management
+
+How to implement Transactions In Microservices?
+
+It is very very difficult to implement and track transactions across multiple services.
+
+Transactional Designpattern:
+
+1.2PC  - 2 Phase Commit
+
+2.Saga
+    -EDA - Event Driven Architectures
+  Saga Implementation
+	-Choreography
+        -Orchestration
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
