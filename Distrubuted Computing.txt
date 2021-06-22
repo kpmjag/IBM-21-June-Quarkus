@@ -467,7 +467,66 @@ Transactional Designpattern:
   Saga Implementation
 	-Choreography
         -Orchestration
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Micro Services Management Patterns:
+
+1.Log Managements
+     Distributed/Centralized log management.
  
+Tools:
+   Graylog - mongodb,ES,Graylog
+   ELK Stack  - ES,Logstash,kibana
+   EFK Stack  - ES,Fluentd,Kibana
+
+
+2.Application Metrics
+     To monitor Application behaviours
+
+Tools:
+   Prometheus
+   AWS Cloud Watch
+
+3.Auditing
+    User auditing,application auditing - Performance
+    Record User activties in a databse
+
+4.Distributed Tracing /Tracking
+   If i want to track service calls
+    A -->B ---C -- Something
+   You can Track Exception Hierachies
+  
+ Open zipkin
+ Open Tracing
+
+5.Health Check Api
+    To test health of apis,infra components.
+
+ Some implemetations provides health endpoints where you can get helath metrics information
+that can be feed to tools 
+
+-Prometheus
+
+
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
  
 
 

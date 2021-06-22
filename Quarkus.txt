@@ -1,0 +1,476 @@
+					Quarkus
+//////////////////////////////////////////////////////////////////////////////////////////////
+What is Quarkus?
+  Quarkus is a framework to built on the top of Various java and JEE Standards.
+  Quarkus has been designed to run on Multi platforms efficiently.
+    -Bare Metal Machine
+    -Containers
+    -Cloud Native Env
+
+    "A Kubernetes Native Java Stack tailored for OpenJDK ,Hotspot and GrallVM"
+
+
+Quarkus:
+
+ built on various standards. JEE , MicroProfile.
+
+
+Java And JEE Standards:
+
+Java Community Process , is non profitable organization who standardize and provides set of 
+spec related java and jee technologies.
+
+The JCP is the mechanism for developing standard technical specifications for Java technology
+
+
+JCP offers Three Stands
+
+1.JSE - Java Standard Edition
+  -Java language Spec
+  -Java VM Spec
+
+
+2.JEE - Java Enterise Edition
+ The Java Enterprise Edition offers APIs and tools for developing multitier enterprise applications.
+
+ -Application Development Specs
+    JPA Spec  - Vendor netural ORM Solutions
+    JSON Binding - JSON-B  
+    Java Servlet 
+    JAX-RS - Building Resfull API
+    JAX-WS - Building xml based webservices -SOAP Webservices
+    Bean Validation
+    JTA  - Java Transaction API
+ -Container Specs 
+    How to create Enterprise grade applications
+
+3.JME - Java Micro Edition
+
+Why JEE Spec failed In Modern Computing?
+  
+   JEE Spec was developed to build traditional Monolothic distributed,transactional, secure  Applications
+
+
+What if i want to use JEE Spec for building Microservices?
+
+ i cant use JEE Spec directly.
+
+Birth of Project called MicroProfile
+
+MicroProfile
+
+Optimizing Enterprise Java - JEE for a Microservices Architecture.
+
+
+Micro Profile addresses the need for enterprise java microservices.
+
+It is set of secifications for handling microservices design patterns. 
+
+MicroProfile enables JEE Developers to leverage their existing skill set while shifiting
+their focus from traditional monolithic applications to Micro Services
+
+
+MicroProfile is just collections of MicroServices Service Patterns on JEE standards
+
+
+Implmentations:
+
+1.Quarkus
+etc...
+
+MicroProfile Specs:
+
+1.JAX-RS - To create HTTP based Microservices-
+2.CDI - Context Dependency Injection - DI - Beans
+3.JSON-B
+4.Configuration
+5.Falut
+6.Health
+etc....
+
+Quarkus is built on top of various projects and standards
+
+
+Quarkus Internal Architecture:
+
+What is quarkus runtime?
+
+How to run java apps?
+
+ Java App
+    |
+  JVM
+   |
+  OS
+
+Container:
+
+ Java App
+    |
+  JVM
+   |
+ Linux
+   |
+ Docker Engine
+   |
+ os
+
+
+Can we Run java apps without JVM ? Can We run java apps on native platforms?
+
+ Java App
+   |
+  Linux
+
+ Java App
+   |
+ Windows
+
+ Java App
+   |
+  Mac
+
+-Performance is higher. Why we need? because apps are running in cloud, we need less memory
+and cpu power .
+
+-Down time , apps are running in scalable , dynamic clusters of machines.
+
+How to reduce boot time in containerisized env?
+
+Container:
+
+ Java App
+    |
+    |
+  Linux
+   |
+ Docker Engine
+   |
+  os
+
+s.o.p---jvm- java api--- c api--jni -----os api------|kern--dv---
+
+javac ---byte code ----grallvm---convert this byte eq- native code at build time.
+
+s.o.p ---os call
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Software Req:
+
+1.GrallVm
+............ 
+2.jdk 11
+3.maven/gradle
+4.IntelliJ idea / vs code
+5.Docker
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Quarkus : First App
+
+
+how to use Maven as a build tool
+how to create and scaffold a new project
+how to deal with extensions
+how to enable live reload
+how to develop your application in your IDE
+how to compile your application natively
+how to setup Quarkus tools in Visual Studio Code, Eclipse IDE, Eclipse Che and IntelliJ
+
+
+Project creations
+
+Way -1
+
+mvn io.quarkus:quarkus-maven-plugin:1.13.7.Final:create \
+    -DprojectGroupId=my-groupId \
+    -DprojectArtifactId=my-artifactId \
+    -DprojectVersion=my-version \
+    -DclassName="org.my.group.MyResource"
+
+
+Way-2 
+mvn io.quarkus:quarkus-maven-plugin:1.13.7.Final:create 
+
+
+Way-3
+https://code.quarkus.io/
+
+Way -4 
+ via Intellij idea plugins
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Running Quarkus :
+
+1.Dev
+2.Test
+3.Production
+
+Dev:
+ ./mvnw compile quarkus:dev - linux /mac
+
+ mvnw compile quarkus:dev  - windows
+
+ mvn compile quarkus:dev
+
+Dev features;
+
+-Live coding Reloading
+   if write code and save and referesh your browser / any tool
+
+
+How to build native image in quarkus
+
+-Quarkus is not using GrallVM directly to build native image rather which uses mandral project
+to convert Quarkus apps into native apps.
+
+mvnw package -Pnative
+    will convert current quarkus app into native binary.
+
+how to package quarkus app/ fat jar /uber jar
+
+./mvn clean package -DskipTests=true
+
+$java -jar target/quarkus-app\quarkus-run.jar
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Creating a linux executable without grallvm installed
+
+ Via Docker , Podman(for linux only)
+
+In windows:
+   Docker file sharing settings must have been enabled.
+
+ Way 1 : using command
+
+mvnw package -Pnative  -Dquarkus.native.container-build=true  -Dquarkus.native.container-runtime=docker
+   it will lookup in local machine whether docker is installed not 
+
+ Way 2: using Docker file
+
+ Steps:
+
+  Your App -----Produce Native Image-----Executable---->Containerize it --->Container Image
+
+ Once Image ready. You can lanuch
+
+Steps:
+
+Build Image:
+docker build -f src/main/docker/Dockerfile.native -t quarkus-quickstart/getting-started .
+
+Run it:
+docker run -i --rm -p 8080:8080 quarkus-quickstart/getting-started
+
+///////////
+
+Native Image Can be built 
+
+-Real Operating System using GrallVm setup
+
+-From any operating System using Docker Container
+
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+Rest api Development
+
+-JAX-RS Spec
+  -RestEasy
+-Servers
+   Embeded Server
+    -Netty
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+JAX-RS :
+
+
+Concepts :
+
+1.Resource;
+
+ It is class represents Restfull Resources.
+@Path
+
+                                  JAX-RS Implementation
+
+
+Any one can implement JS-RS spec.
+
+1.RESTEasy
+2.Jersy
+etc...
+
+RESTEasy
+   FRAMWORK implements jax rs spec
+RESTEasy is a JBoss / Red Hat project that provides various frameworks to help you build RESTful Web Services and RESTful Java applications.
+It is an implementation of the Jakarta RESTful Web Services, an Eclipse Foundation specification that provides a Java API for RESTful Web Services over the HTTP protocol.
+Moreover, RESTEasy also implements the MicroProfile REST Client specification API.
+
+
+Lab : How to represent resources:
+.................................
+
+package org.ibm;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+
+@Path("/product")
+public class ProductResource {
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String findAll() {
+        return "Product findAll";
+    }
+
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void create(String product) {
+        System.out.println(product);
+    }
+
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String update(String product) {
+        return product + "Updated";
+    }
+
+    @DELETE
+    public void remove() {
+        System.out.println("Product deleted");
+    }
+}
+
+Parameters:
+
+@MatrixParam Extracts the value of a URI matrix parameter.
+@QueryParam Extracts the value of a URI query parameter.
+@PathParam Extracts the value of a URI template parameter.
+@CookieParam Extracts the value of a cookie.
+@HeaderParam Extracts the value of a header.
+@Context Injects an instance of a supported resource
+
+package org.ibm;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+
+@Path("/product")
+public class ProductResource {
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String findAll() {
+        return "Product findAll";
+    }
+
+    @GET
+    @Path("/{productId}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getProductById(@PathParam("productId") String id) {
+        return id;
+    }
+
+    // http://localhost:8080/product/filter?category=sports
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/filter")
+    public String filterProductByCategoriees(@QueryParam("category") String category){
+        System.out.println("");
+        return category;
+    }
+
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void create(String product) {
+        System.out.println(product);
+    }
+
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String update(String product) {
+        return product + "Updated";
+    }
+
+    @DELETE
+    public void remove() {
+        System.out.println("Product deleted");
+    }
+}
+
+How to access "Servlet OBjects" inside Rest End Points
+
+javax.ws.rs.core.HttpHeaders
+javax.ws.rs.core.UriInfo
+javax.ws.rs.core.Request
+javax.servlet.http.HttpServletRequest
+javax.servlet.http.HttpServletResponse
+javax.servlet.ServletConfig
+javax.servlet.ServletContext
+javax.ws.rs.core.SecurityContext
+
+
+package org.ibm;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+
+@Path("/containerinfo")
+public class ContainerResources {
+
+    @Produces(MediaType.TEXT_PLAIN)
+    @GET()
+    @Path("/urls")
+    public String getUriInfo(@Context UriInfo uriInfo) {
+        System.out.println(uriInfo.getAbsolutePath() + " " + uriInfo.getRequestUri());
+        return "Url Information";
+    }
+
+    @Produces(MediaType.TEXT_PLAIN)
+    @GET()
+    @Path("/headers")
+    public String getHeaders(@Context HttpHeaders headers) {
+        System.out.println(headers.getRequestHeaders());
+        return "headers Information";
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Return Type of API:
+
+ - String
+ - Objects
+ - Void
+ - Response
+
+Response;
+
+ Object used to send "payload-data" along with meta data (http code,otherinformation)
+
+HTTP Status codes:
+
+-> informational response - 100 to 199
+-> success response -  200-299
+-> Redirects  - 300-399
+-> client errors - 400-499
+-> server errrors - 500-599
+
+Response Builder:
+
+ Response.ResponseBuilder is inner class of Response used to build response Objects.
+  
+Response  = payload  + meta data(headers,options)
+            entity
+
+
