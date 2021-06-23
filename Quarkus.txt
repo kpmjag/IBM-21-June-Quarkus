@@ -841,23 +841,83 @@ All infra config starts with
  quarkus.
 https://quarkus.io/guides/all-config
  
+..............................................................................................
+                                       Thread Management
+
+NonBlocking:
+
+ Quarkus Http Engine is non blocking.
+
+How traditional Web Servers working?
 
 
+Blocking IO:
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class CopyBytes {
+    public static void main(String[] args) throws IOException {
+
+        FileInputStream in = null;
+        FileOutputStream out = null;
+
+        try {
+            in = new FileInputStream("xanadu.txt");
+            out = new FileOutputStream("outagain.txt");
+            int c;
+
+            while ((c = in.read()) != -1) {
+                out.write(c);
+            }
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 
+.class           JNI(c layer)           Linux OS            Kernal
+in.read()-------->read()----sys call(c) read() ------>   File Descriptor    DD
+                                                           read : ### ------|-----|DEVICE
+
+FD :
+ MAP
+
+Key - value
+0   - Keyboard         resoucers
+1   - Monitor
+2   - Monitor
+................
+
+Kernal
+
+for(;;){
+   iterate fd
+   0 -key ----- checks any data
+   1 - m --- ----- checks any data
+   2 - m --- ----- checks any data
+   3 - networksocket --- ----- checks any data
+   4 -networksocket --- ----- checks any data  - yes- copy data into buffer|---OK(EVENT)----|Inform---User Space----|ApplicationRuntime----process data.
+   5 -filesystem----- ----- checks any data
+}
+
+Event loop is a infinte for loop keep on spins for watching any one of the file descriptor for 
+"data".
 
 
+Quarkus uses Vertx Event loop architecture for handling non blocking HTTP Server handling processing:
 
+Every req in Quarkus is delegated to Vert.x event loop thread.
 
-
-
-
-
-
-
-
-
-
+Vert.x uses more threads , generally per cpu core - 2 threads :  if 12 cores, 24 threads
 
 
 
