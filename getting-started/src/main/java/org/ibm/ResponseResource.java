@@ -11,7 +11,7 @@ import javax.ws.rs.core.UriBuilder;
 @Path("/responses")
 public class ResponseResource {
 
-    
+
     @Path("/ok")
     @GET
     public Response sayOk() {
@@ -29,6 +29,6 @@ public class ResponseResource {
     @GET
     public Response sendStatus() {
         //return Response.status(200).entity("status").build();
-        return Response.status(Response.Status.OK).entity("status").build();
+        return Response.status(Response.Status.OK).header("someheader","somevalue").entity("status").build();
     }
 }

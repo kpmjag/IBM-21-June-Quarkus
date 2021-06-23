@@ -299,7 +299,7 @@ Concepts :
                                   JAX-RS Implementation
 
 
-Any one can implement JS-RS spec.
+Any one can implement Jax-RS spec.
 
 1.RESTEasy
 2.Jersy
@@ -404,7 +404,7 @@ public class ProductResource {
     }
 }
 
-How to access "Servlet OBjects" inside Rest End Points
+How to access "Servlelt like OBjects" inside Rest End Points
 
 javax.ws.rs.core.HttpHeaders
 javax.ws.rs.core.UriInfo
@@ -472,5 +472,395 @@ Response Builder:
   
 Response  = payload  + meta data(headers,options)
             entity
+
+
+package org.ibm;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+
+@Path("/containerinfo")
+public class ContainerResources {
+
+    @Produces(MediaType.TEXT_PLAIN)
+    @GET()
+    @Path("/urls")
+    public String getUriInfo(@Context UriInfo uriInfo) {
+        System.out.println(uriInfo.getAbsolutePath() + " " + uriInfo.getRequestUri());
+        return "Url Information";
+    }
+
+    @Produces(MediaType.TEXT_PLAIN)
+    @GET()
+    @Path("/headers")
+    public String getHeaders(@Context HttpHeaders headers) {
+        System.out.println(headers.getRequestHeaders());
+        return "headers Information";
+    }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+How to send JSON Response?
+
+Quarks cant convert any object into JSON by default with help of "RestEasy" extension
+
+ GET /developer/list: org.jboss.resteasy.core.NoMessageBodyWriterFoundFailure: Could not find MessageBodyWriter for response object of type: org.ibm.entity.Developer of media type: application/json
+
+Why because we are missing serilizer and desserializer - JSON Converter not there.
+  
+
+Dealing with extensions	:
+ 
+Extensions are libs. which can be added dynamically when you develop app
+
+
+./mvnw quarkus:list-extensions
+
+  To list available supported extsions.
+
+./mvnw quarkus:add-extension -Dextensions="resteasy-jsonb"
+
+Eg for RestEasy Extensions:
+
+RESTEasy Jackson                                   quarkus-resteasy-jackson
+RESTEasy JAXB                                      quarkus-resteasy-jaxb
+RESTEasy JSON-B                                    quarkus-resteasy-jsonb
+RESTEasy Multipart                                 quarkus-resteasy-multipart
+RESTEasy Mutiny                                    quarkus-resteasy-mutiny
+RESTEasy Qute                                      quarkus-resteasy-qute
+RESTEasy Reactive Jackson                          quarkus-resteasy-reactive-jackson
+RESTEasy Reactive JSON-B                           quarkus-resteasy-reactive-jsonb
+RESTEasy Reactive Qute                             quarkus-resteasy-reactive-qute
+RESTEasy Reactive                                  quarkus-resteasy-reactive
+RESTEasy JAX-RS                                    quarkus-resteasy
+
+
+package org.ibm;
+
+import org.ibm.entity.Developer;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+
+@Path("/developer")
+public class DeveloperResource {
+
+    @POST
+    @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createDeveloper(Developer developer) {
+        developer.persist();
+        System.out.println(developer);
+        ///developer/1 = UriBuilder.fromResource().
+        return Response.created(UriBuilder.fromResource(DeveloperResource.class).path("/create/" + Long.toString(developer.getId())).build())
+                .entity(developer)
+                .header("dev", developer.getName())
+                .build();
+    }
+
+    @Path("/list")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDeveloper() {
+        Developer developer = new Developer();
+        developer.setName("Subramanian");
+        developer.persist();
+        return Response.ok().entity(developer).build();
+    }
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+How handle Exceptions, How to send error Responses
+
+
+package org.ibm;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+@Path("/customer")
+public class CustomerResource {
+
+    @GET
+    @Path("/{customerId}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getCustomerId(@PathParam("customerId") String id) {
+
+        if (id.equals("abc")) {
+            throw new WebApplicationException("Element with position " + id + " does not exist.", 404);
+        }
+        //biz if this failed throw new YourBizException("Something went wrong in my biz")
+        return Response.ok(Integer.parseInt(id)).build();
+    }
+
+    @Provider
+    public static class WebApplicationErrors implements ExceptionMapper<WebApplicationException> {
+        @Override
+        public Response toResponse(WebApplicationException e) {
+            //return Response.status(500).entity(e.getMessage()).build();
+            return Response.status(Response.Status.BAD_GATEWAY).entity(e.getMessage()).header("err", "myerr").build();
+        }
+    }
+
+    @Provider
+    public static class CustomerExceptionMapper implements ExceptionMapper<Exception> {
+        @Override
+        public Response toResponse(Exception e) {
+            //return Response.status(500).entity(e.getMessage()).build();
+            return Response.status(Response.Status.BAD_GATEWAY).entity(e.getMessage()).header("err", "myerr").build();
+        }
+    }
+
+}
+
+}
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Configuration:
+.............
+- How to configure a Quarkus service
+- How to inject configuration parameters in the service
+- How to apply values depending on the environment
+- How to correctly configure the logging system
+- How to create customizations for the configuration system
+
+
+configuration has been implemented using MicroProfile config 2.0 spec
+ https://github.com/eclipse/microprofile-config/releases/tag/2.0
+
+configuration naming conventions:
+.................................
+This is similar to Java package namespacing.
+because java packages are unquie
+
+resources/application.properties
+
+com.acme.myproject.someserver.url = http://some.server/some/endpoint
+com.acme.myproject.someserver.port = 9085
+com.acme.myproject.someserver.active = true
+com.acme.other.stuff.name = Karl
+com.acme.myproject.notify.onerror=karl@mycompany,sue@mcompany
+some.library.own.config=some value
+
+application.properties
+
+How to supply configuration parameters to the application.
+
+Syntax:
+
+domain.message=value
+
+
+
+application.properties
+
+#Your App configuration
+greeting.message = Hai
+greeting.name = Subramanian
+greeting.from = quarkus
+
+package org.ibm;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+
+@Path("/config")
+public class ConfigResource {
+
+    //inject configuration values
+    @ConfigProperty(name = "greeting.message")
+    String message;
+    @ConfigProperty(name = "greeting.name")
+    String name;
+    @ConfigProperty(name = "greeting.from")
+    String from;
+    @ConfigProperty(name = "greeting.suffix", defaultValue = "!")
+    String suffix;
+
+    @Path("/greet")
+    @GET
+    public Response getGreeting() {
+        return Response.ok().entity(message + name + "from " + from + " " + suffix ).build();
+    }
+}
+
+
+Does Quarkus Supports Yaml Formats ?
+
+Yes
+./mvnw quarkus:add-extension -Dextensions="config-yaml"
+
+You can mix both files
+
+application.yml
+
+greeting:
+  message: Hello Yaml
+
+
+package org.ibm;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+
+@Path("/config")
+public class ConfigResource {
+
+    //inject configuration values
+    @ConfigProperty(name = "greeting.message")
+    String message;
+    @ConfigProperty(name = "greeting.name")
+    String name;
+    @ConfigProperty(name = "greeting.from")
+    String from;
+    @ConfigProperty(name = "greeting.suffix", defaultValue = "!")
+    String suffix;
+
+    @Path("/greet")
+    @GET
+    public Response getGreeting() {
+        return Response.ok().entity(message + name + "from " + from + " " + suffix ).build();
+    }
+}
+
+
+# Accessing Configuration Properties Programmatically
+
+You want to access configuration properties programmatically instead of injecting
+them using the org.eclipse.microprofile.config.inject.ConfigProperty
+annotation.
+
+
+Inject the org.eclipse.microprofile.config.Config class in the object for which
+you want to access properties programmatically.
+
+The Eclipse MicroProfile Configuration spec allows you to inject org.eclipse.micro
+profile.config.Config to get properties programmatically instead of injecting
+directly with ConfigProperty.
+
+After dicussion with CDI
+
+
+
+# Overwriting Configuration Values Externally
+
+You want to overwrite any configuration value at runtime.
+
+Quarkus lets you overwrite any configuration property by setting a configuration
+as a system property (-Dproperty.name=value) and/or as an environment variable
+(export PROPERTY_NAME=value). 
+
+
+System properties have more priority than environment
+variables.
+
+
+./mvnw clean package -DskipTests
+
+
+>java -Dgreeting.message=Aloha -Dgreeting.name=John -jar target/quarkus-app/quarkus-run.jar
+
+
+# Configuring with Profiles
+
+You want to overwrite configuration values depending on the environment in which
+you are running Quarkus.
+
+Quarkus supports the notion of configuration profiles.
+
+These allow you to have multiple configuration values for the same property in the same file and enable different values to suit the environment in which you are running the service.
+
+
+The syntax for configuration profiles is %{profile}.config.key=value.
+
+Types of built-in profiles
+
+dev
+test
+prod
+
+Open src/main/resources/application.properties file and set to start Quarkus at port
+8181 in development mode:
+
+%dev.quarkus.http.port=8181
+
+
+./mvnw compile quarkus:dev
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+                                                                 Property Sources
+   Your App
+   application.properties                                      1.application.properties | Yaml
+     foo.myvalue=bar
+                                                               2. Env variables                
+							       3. command line args 
+    @ConfigProperty(name="foo.somepro",defaultValue="") |->    4. External servers
+    myVariable                                          |
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Types of COnfiguration:
+
+1.Application information configurations
+   if you want to supply application spefic congfig
+   messages, names, etc......
+
+2.Application infrastructure configurations
+ 
+   HTTP server configurations.
+
+   Data Source Configurations
+
+   ORM Configurations -Hibernate
+
+   etc.....
+
+All infra config starts with
+
+ quarkus.
+https://quarkus.io/guides/all-config
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
