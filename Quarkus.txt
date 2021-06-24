@@ -919,8 +919,499 @@ Every req in Quarkus is delegated to Vert.x event loop thread.
 
 Vert.x uses more threads , generally per cpu core - 2 threads :  if 12 cores, 24 threads
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Context Depedency Injection: CDI
+.................................
+
+CDI Services:
+
+Contexts: The ability to bind the lifecycle and interactions of stateful components(bean) to well-defined but extensible lifecycle contexts
+
+Dependency injection: The ability to inject components(bean) into an application in a typesafe way, including the ability to choose at deployment time which implementation of a particular interface to inject
+
+How to Inject bean(component?
+
+@Inject
+
+Scopes Of beans:
+
+Request @RequestScoped
+  A user’s interaction with a web application in a single HTTP request.
+
+Session @SessionScoped
+A user’s interaction with a web application across multiple HTTP requests.
+
+Application @ApplicationScoped
+    Shared state across all users’ interactions with a web application.
+
+Dependent @Dependent
+
+The default scope if none is specified; it means that an object exists to serve exactly one client (bean) and has the same lifecycle as that client (bean).
+
+
+@SingleTon
+   Only one instance per container
+
+
+@ApplicationScoped vs @SingleTon:
+
+SingleTon beans are eagerly created.
+ApplicationScoped is lazyly created
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+package org.ibm.services;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.awt.*;
+
+@ApplicationScoped
+public class GreeterService {
+
+    @Inject
+    HelloService helloService;
+
+    private HaiService haiService;
+
+    public GreeterService(){
+
+    }
+
+    @Inject
+    public GreeterService(HaiService haiService){
+        this.haiService = haiService;
+    }
+    //new GreeterService(new HaiService())
+
+    @PostConstruct
+    public void init() {
+        System.out.println("GreeterService is init");
+    }
+
+    public String sayHello() {
+        return helloService.sayHello()  + haiService.sayHai();
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("Greeter Service destroy is called");
+    }
+}
+
+
+package org.ibm.services;
+
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class HaiService {
+
+    public String sayHai(){
+       return "Hai";
+    }
+}
+
+package org.ibm.services;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
+
+//@ApplicationScoped
+@Singleton
+public class HelloService {
+    public String sayHello() {
+        return "Hello Service!!!";
+    }
+}
+package org.ibm;
+
+import org.ibm.services.GreeterService;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+@Path("/hello")
+public class GreetingResource {
+
+    @Inject
+    GreeterService greeterService;
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String hello() {
+        return greeterService.sayHello();
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////
+                                   Data Sources
+////////////////////////////////////////////////////////////////////////////////////////////
+
+How to configure Datasources:
+
+In order to connect database.
+
+JDBC AND ORM:
+............
+if you want to connect database
+
+1.drivers
+2.connection information
+3.get Connection Object
+4.start writing
+
+Data Modules supported by Quarkus:
+...................................
+
+1.Core Data source
+
+2.Hibernate and data source
+
+3.Hibernate and Panache
+
+
+Data source configuration:
+
+application.properties
+
+quarkus.datasource.db-kind=postgresql 
+quarkus.datasource.username=<your username>
+quarkus.datasource.password=<your password>
+
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/hibernate_orm_test
+quarkus.datasource.jdbc.max-size=16
 
 
 
+Default Data Source: having minmum configuration: H2
+quarkus.datasource.db-kind=h2
+
+db-kind 
+  Property says what type of database we connect.
+
+common db-kind value conventions
+
+DB2: db2
+
+Derby: derby
+
+H2: h2
+
+MariaDB: mariadb
+
+Microsoft SQL Server: mssql
+
+MySQL: mysql
+
+Oracle: oracle
+
+PostgreSQL: postgresql, pgsql or pg
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Required Dependency:
+
+1./mvnw quarkus:add-extension -Dextensions="agroal"
+
+2.relational database driver.
+
+mvnw quarkus:add-extension -Dextensions="jdbc-postgresql"
+
+mvnw quarkus:add-extension -Dextensions="jdbc-h2"
 
 
+JDBC Code using Datasource:
+
+application.properties
+
+
+#Datasource configuration.
+quarkus.datasource.db-kind=h2
+
+
+package org.ibm.services;
+
+import io.agroal.api.AgroalDataSource;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+@ApplicationScoped
+public class UserService {
+
+    @Inject
+    AgroalDataSource defaultDataSource;
+
+    @PostConstruct
+    public void init() {
+        System.out.println("H2- db init is called");
+        try {
+            Connection connection = defaultDataSource.getConnection();
+            System.out.println(connection);
+            Statement stmt = connection.createStatement();
+            stmt.executeUpdate("CREATE TABLE TABLE1(id INT NOT NULL,  title VARCHAR(50))");
+            stmt.executeUpdate("INSERT INTO TABLE1 " + "VALUES (100, 'Subramanian')");
+            ResultSet rs = stmt.executeQuery("select * from table1");
+            while (rs.next()) {
+                System.out.println(rs.getInt(1) + "  " + rs.getString(2));
+            }
+            stmt.close();
+            connection.close();
+
+        } catch (SQLException sqlException) {
+            System.out.println(sqlException.getMessage());
+        }
+    }
+    public String getUser(){
+        return  "User";
+    }
+}
+
+Multiple Datasources
+  
+ We can have multiple datasources, each data source can connect different type of databses
+
+Rule : Data base Per service Rule of Microservice
+
+i want to configure three data source
+
+1.default
+2.users
+3.inventory
+
+
+quarkus.datasource.domainname.db-propertie=value
+
+application.properties
+
+quarkus.datasource.db-kind=h2
+quarkus.datasource.username=username-default
+quarkus.datasource.jdbc.url=jdbc:h2:tcp://localhost/mem:default
+quarkus.datasource.jdbc.max-size=13
+
+quarkus.datasource.users.db-kind=h2
+quarkus.datasource.users.username=username1
+quarkus.datasource.users.jdbc.url=jdbc:h2:tcp://localhost/mem:users
+quarkus.datasource.users.jdbc.max-size=11
+
+quarkus.datasource.inventory.db-kind=h2
+quarkus.datasource.inventory.username=username2
+quarkus.datasource.inventory.jdbc.url=jdbc:h2:tcp://localhost/mem:inventory
+quarkus.datasource.inventory.jdbc.max-size=12
+
+
+package org.ibm.services;
+
+import io.agroal.api.AgroalDataSource;
+import io.quarkus.agroal.DataSource;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+@ApplicationScoped
+public class UserService {
+
+    @Inject
+    AgroalDataSource defaultDataSource;
+
+    @Inject
+    @DataSource("users")
+    AgroalDataSource usersDataSource;
+
+    @PostConstruct
+    public void init() {
+        System.out.println("H2- db init is called");
+        try {
+            Connection connection = defaultDataSource.getConnection();
+            System.out.println(connection);
+            Statement stmt = connection.createStatement();
+            stmt.executeUpdate("CREATE TABLE TABLE1(id INT NOT NULL,  title VARCHAR(50))");
+            stmt.executeUpdate("INSERT INTO TABLE1 " + "VALUES (100, 'Subramanian')");
+            ResultSet rs = stmt.executeQuery("select * from table1");
+            while (rs.next()) {
+                System.out.println(rs.getInt(1) + "  " + rs.getString(2));
+            }
+            stmt.close();
+            connection.close();
+
+        } catch (SQLException sqlException) {
+            System.out.println(sqlException.getMessage());
+        }
+    }
+    public String getUser(){
+        try {
+            Connection connection = usersDataSource.getConnection();
+            System.out.println(connection);
+            Statement stmt = connection.createStatement();
+            stmt.executeUpdate("CREATE TABLE user(id INT NOT NULL,  title VARCHAR(50))");
+            stmt.executeUpdate("INSERT INTO user " + "VALUES (100, 'Subramanian')");
+            ResultSet rs = stmt.executeQuery("select * from user");
+            while (rs.next()) {
+                System.out.println(rs.getInt(1) + "  " + rs.getString(2));
+            }
+            stmt.close();
+            connection.close();
+
+        } catch (SQLException sqlException) {
+            System.out.println(sqlException.getMessage());
+        }
+        return  "User";
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Hibernate ORM - JPA -Panache:
+.............................
+
+Quarkus can integrate ORM Via JPA Spec ,provider is Hibernate.
+
+Configuration:
+
+1.application.properties
+
+2.@Entity
+
+Dependency:
+
+1.Hibernate 
+io.quarkus:quarkus-hibernate-orm
+2.JDBC Driver
+ jdbc-h2 ,jdbc-db2
+
+application.properties
+
+# datasource configuration
+quarkus.datasource.db-kind = postgresql
+quarkus.datasource.username = hibernate
+quarkus.datasource.password = hibernate
+quarkus.datasource.jdbc.url = jdbc:postgresql://localhost:5432/hibernate_db
+
+# drop and create the database at startup (use `update` to only update the schema)
+quarkus.hibernate-orm.database.generation=drop-and-create
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Hibernate:
+
+ -CURD operations
+ -Caching - You can use hibernate in memory caching, caching providers  (memcache,redis,inifispan)
+ -Transaction Management -JTA -narayana-jta ---| Reactive + Non Reactive Style
+
+
+Example:
+
+Steps:
+
+1.start db server
+docker run --ulimit memlock=-1:-1 -it --rm=true --memory-swappiness=0 --name quarkus_test -e POSTGRES_USER=quarkus_test -e POSTGRES_PASSWORD=quarkus_test -e POSTGRES_DB=quarkus_test -p 5432:5432 postgres:11.5
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+SIMPLIFIED HIBERNATE ORM WITH PANACHE:
+......................................
+
+In General, curd is implemented using
+
+JPA and Hibernate specific apis, this is makes our code tightly coupled.
+
+DAO Design pattern abstracts away how to handle database operations like DOMAIN Models.
+
+Quarkus offers that abstraction via panache.
+
+@Entity
+public class Person extends PanacheEntity {
+    public String name;
+    public LocalDate birth;
+    public Status status;
+
+    public static Person findByName(String name){
+        return find("name", name).firstResult();
+    }
+
+    public static List<Person> findAlive(){
+        return list("status", Status.Alive);
+    }
+
+    public static void deleteStefs(){
+        delete("name", "Stef");
+    }
+}
+
+
+PanacheEntity Features:
+///////////////////////
+
+1.offers most of the biz apis -  finder apis,delete,update,persit......
+2.you can extend /add your own biz apis as you need.
+3.can return Data
+    1.directly - eg if you are asking list of customers -List will be returned
+    2.Stream of data - you can use java 8 stream style apis.
+       findAll().sort().distinct().toList().....
+
+
+Hibernate/ORM Design patterns:
+
+1. active record pattern
+ 
+Enity will have
+  -Data 
+  -api to manipulate data
+In Quarkus , if you want to implement this Pattern, you can use PancheEntity as base class
+
+@Entity
+public class Person extends PanacheEntity {
+    public String name;
+    public LocalDate birth;
+    public Status status;
+
+    public static Person findByName(String name){
+        return find("name", name).firstResult();
+    }
+
+    public static List<Person> findAlive(){
+        return list("status", Status.Alive);
+    }
+
+    public static void deleteStefs(){
+        delete("name", "Stef");
+    }
+}
+
+
+2. Repository Design pattern
+
+  -Data will isloated into entities
+  -apis to manipulate that data will be isloated
+
+@ApplicationScoped
+public class PersonRepository implements PanacheRepository<Person> {
+
+   // put your custom logic here as instance methods
+
+   public Person findByName(String name){
+       return find("name", name).firstResult();
+   }
+
+   public List<Person> findAlive(){
+       return list("status", Status.Alive);
+   }
+
+   public void deleteStefs(){
+       delete("name", "Stef");
+  }
+}
