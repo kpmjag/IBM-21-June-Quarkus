@@ -1415,3 +1415,911 @@ public class PersonRepository implements PanacheRepository<Person> {
        delete("name", "Stef");
   }
 }
+/////////////////////////////////////////////////////////////////////////////////////////////
+                                     Logging
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+You want to change the default logging configuration.
+
+Open src/main/resources/application.properties and add the following content:
+
+quarkus.log.level=DEBUG
+
+# Changing Logger Configuration
+
+You want to change the default logging configuration.
+
+Open src/main/resources/application.properties and add the following content:
+quarkus.log.level=DEBUG
+
+
+You can also enable storing logs in a file by using quarkus.log.file.enable property.
+The output is written by default to a file named quarkus.log:
+quarkus.log.file.enable=true
+
+
+Application Logging:
+.......................
+
+Most of the time, your applications need to write their own logging messages and not
+rely solely on the default logs provided by Quarkus. Applications may use any of the
+supported APIs for logging, and the logs will be merged.
+
+Quarkus supports these logging libraries:
+
+• JDK java.util.logging
+• JBoss logging
+• SLF4J
+• Apache Commons Logging
+
+package org.acme;
+
+import org.jboss.logging.Logger;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+@Path("/hello-resteasy")
+public class GreetingResource {
+    private static Logger logger = Logger.getLogger(GreetingResource.class);
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+
+    public String hello() {
+        logger.info("Hello is called");
+        return "Hello RESTEasy";
+    }
+}
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Logging Reporting Technology: Centeralized Log Management Micro Service Log Management.
+.......................................................................................
+
+
+When working with microservice architectures and Kubernetes, logging is an important
+thing to take into consideration because each service is logging individually; but
+as a developer or operator, you might want to have all the logs centralized in one
+place so they can be consumed as a whole.
+
+
+
+Use the GELF extension to produce logs in GELF format and send them using either
+TCP or UDP.
+
+Graylog extended log format (GELF) is understood by three of the most centralized
+logs systems that are used nowadays:
+
+
+• Graylog (MongoDB, Elasticsearch, Graylog)
+ -Product to collect logs from the application(ms) for analysis.
+
+• ELK (Elasticsearch, Logstash, Kibana)
+
+• EFK (Elasticsearch, Fluentd, Kibana)
+
+
+Steps:
+
+1.mvnw quarkus:add-extension -Dextensions="logging-gelf"
+
+2.application.properties
+
+quarkus.log.handler.gelf.enabled=true
+quarkus.log.handler.gelf.host=localhost
+quarkus.log.handler.gelf.port=12201
+
+3.code
+package org.acme;
+
+import org.jboss.logging.Logger;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+@Path("/hello-resteasy")
+public class GreetingResource {
+    private static Logger logger = Logger.getLogger(GreetingResource.class);
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+
+    public String hello() {
+        logger.info("Hello is called");
+        return "Hello RESTEasy";
+    }
+}
+
+4.Send logs to Graylog
+To send logs to Graylog, you first need to launch the components that compose the Graylog stack:
+MongoDB
+Elasticsearch
+Graylog
+
+
+5.create dockercompose and start running 
+
+src/resources/docker-compose.yml
+version: '3.2'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.2
+    ports:
+      - "9200:9200"
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    networks:
+      - graylog
+
+  mongo:
+    image: mongo:4.0
+    networks:
+      - graylog
+
+  graylog:
+    image: graylog/graylog:3.1
+    ports:
+      - "9000:9000"
+      - "12201:12201/udp"
+      - "1514:1514"
+    environment:
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://127.0.0.1:9000/"
+    networks:
+      - graylog
+    depends_on:
+      - elasticsearch
+      - mongo
+
+networks:
+  graylog:
+    driver: bridge
+
+6. start containers 
+
+ src/resources/docker-compose up
+
+
+
+7.Configuration in graylog 
+
+
+login using http://localhost:9000
+ : using admin and admin
+
+ Then, you need to create a UDP input in Graylog.
+    You can do it from the Graylog web console (System → Input → Select GELF UDP) available at 
+  
+where need to select - global input.
+
+
+
+
+NOte : Build your app in production mode , then only logs will be emitted
+
+./ mvnw package
+
+java -jar target/quarkus-app/quarkus-run.jar
+
+
+8.send messages watch the messages in graylog dashboard
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+				   Reactive Programming
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+What is reactive programming?
+
+
+It is one of the  Programming Paradigm(way).
+
+Reactive programming is collection of many programming paradigm best parts and principles.
+
+Reactive programming is collection of oo , functional, event driven......principles
+
+
+Reactive Programming languages:
+..............................
+
+There is no such separate pl which adopts reactive programming alone.
+ rather which is eXtended by other languages : 
+Reactive programming is just like plugin, which has been pluged in inside languages via libs and frameworks.
+
+Reactive-X(x means Extension /plugin)
+
+C# can extend Reactive programming principles -Rx.net /RXC#
+js  - rxjs
+//////////////////////////////////////////////////////////////////////////////////////////
+                             Java and Reactive Programming
+    ....................................................................................
+
+
+RxJava
+Project Reactor
+Mutiny - SmallRye Product.
+java 9 Reactive Stream Api
+
+
+                                      Reactive Programming 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+What is reactive programming?
+
+It is one of the  Programming Paradigm(way).
+
+Reactive programming is collection of many programming paradigm best parts and principles.
+
+Reactive programming is collection of oo , functional, event driven......principles
+
+
+Reactive Programming languages:
+..............................
+
+There is no such separate pl which adopts reactive programming alone.
+ rather which is eXtended by other languages : 
+Reactive programming is just like plugin, which has been pluged in inside languages via libs and frameworks.
+
+Reactive-X(x means Extension /plugin)
+
+C# can extend Reactive programming principles -Rx.net
+Java even  - Rxjava
+js  - rxjs
+///////////////////////////////////////////////////////////////////////////////////////////
+
+History of Rx Programming:
+.........................
+
+At Microsoft Erik Meijer who created Reactive Programming ideas from "C#".
+
+Core Ideas behind Reactive Programming :
+
+Object:
+  -setters - write
+  -getters - read
+
+getters
+   -single value - scallar values -number,strings,booleans,object
+   -iteralble value(many values) - array , collection-list,map,set
+
+Iterations:
+ IEnumerable ,IEnumerator 
+
+IEnumerator 
+   - bridge interface which is used to iterate collection
+
+  producer                                  consumer/subscriber Caller(requester)
+  moveNext():boolean --------------------  give me a value /error
+
+Based this we define programming model called "Pull based"
+
+ consumer pulls value from producer.
+ consumer has control over producer.
+ consumer only decide when he wants item.
+
+             "Values are produced on demand by consumer"
+
+Before a decade, programming model started like "Cloud based, async programming Programming"
+
+Push Based Programming:
+
+
+public List<Cutomer> findAll(){
+
+   return customerList;
+}
+
+
+public void findAll(Consumer dataconsumer,Consumer errorConsumer,Consumer cmp){
+
+   ....talk to db
+   once data ready
+   consumer.call(customers) //emit event 
+   dataconsumer.dispatch("dataready",customers)
+   errorConsumer.dispatch("error",errorObject)
+   cmp.dispatch("completed")  
+}
+
+int status = update(); -----|block
+List cust = findAll(); ----|block
+Customer cus = select();
+
+callback/event driven 
+
+findAll(customers->sop(customers),err->sop(err),done->sou )
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+An Observable is the asynchronous/push “dual” to the synchronous/pull Iterable
+
+event	        Iterable (pull)	 Observable (push)
+retrieve data	T next()	 onNext(T)
+discover error	throws Exception onError(Exception)
+complete	!hasNext()	 onCompleted()
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Reactive Programming Standards:
+................................
+
+1.The Reactive Manifesto
+   -Message Driven
+   -Responsive
+   -Resilient
+   -Elastic
+
+2.Reactive Streams
+
+  -Spec invented  to fix problems in "Push Based Programming"
+
+Back Pressure:
+
+   Publisher is fast to produce data where consumer/operator is too slow to handle /process
+data , that time "back pressure is created". when back press is created , you might loose 
+data. This is what the problem of push based programming
+
+
+
+   UpStream/source stream is fast to produce data where consumer/down stream is too slow to handle /process data , that time "back pressure is created". when back press is created , you might loose data. This is what the problem of push based programming.
+
+ "Reactive Streams"  talks about how consumer/down stream can request upstream/source to stop
+ sending data before it completes.
+
+  Reactive Stream = Push + Pull => React Push =>Reactive Streams
+
+
+Rxjava :
+
+ 1.Observable- type to represent Producer/Publisher
+ 2.Flowable  - Same Observable(Producer) 
+
+ Observable has not implemented Reactive Stream spec
+ Flowable has implemented React Stream Spec.
+
+
+Project Reactor
+
+ Mono /Flux implements Reactive stream spec
+
+Mutiny
+  Multi implements Reactive Stream spec
+
+                                      org.reactivestreams.Publisher
+						    |
+			           -----------------------------------------
+                                         |           |             |
+                                      Flowable     Mono/Flux      Multi
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Mutiny:
+......
+
+Mutiny is reactive lib built on react stream spec.
+
+Features:
+
+Event-Driven
+Navigable
+Non-Blocking I/O
+Quarkus and Vert.x native
+Made for an asynchronous world
+Reactive Converters Built-In
+
+
+Rxfication:
+  Wrapping core rx libs inside other libs
+
+eg:
+   Spring WebFlux ---- rxfied on project Reactor
+   Vertx.Rx   ------> rxified on Vert.x
+   Angular -----> rxified on rxjs
+   quakurs-muntiny -  rxified on quarkus
+
+
+Mutiny Types(Publisher):
+........................
+
+  
+1.Uni
+2.Multi
+
+
+Uni:  
+ A Uni represents a stream that can only emit either "an" item or "a" failure event.
+Only one either data or error
+
+Multi
+A Multi represents a stream of data.
+
+A stream can emit 0, 1, n, or an infinite number of items.
+ 0 to infinte.
+
+A Multi<T> is a data stream that:
+
+1.emits 0..n item events
+
+2.emits a failure event
+
+3.emits a completion event for bounded streams
+
+Uni/Multi Object Creation:
+
+1.Can be created using factory pattern.
+
+  Uni.create()
+
+2.All operators(methods) are chainable - Pure function patterns
+
+3.The out put of one operator will be input to the next operator in functional way
+  The ouput always immutable. when any operations happens on data , will not have 
+  old data.
+  Each operator will have fresh data always.
+
+4.Uni/Multi is Generic Powered .you can emit any type of data.
+
+5.Events are represented like
+  
+   on+EventName eg : onItem, onError onComplete
+
+6.Muntiny Streams are lazy
+    "Dont emit data until you subscribe".
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+I(Publisher) have item, that need to be delivered to Subscriber with delay of 1ms
+
+  Delay implementation
+    -Timer
+    -Thread
+    -Custom Logic
+
+Imperative  code vs Declarative code.
+
+Imperative says that how to do(logic) and also what to do(requriement)
+
+Declarative programming says that dont focus logic(how to do) , focus what to do(requirement).
+today lot of programming languages offers declarative apis via lib or as part of language.
+
+eg: Java streams 
+     -Declarative Collection api for processing data.
+      List.toStream().sort().distinct().forEach
+
+Reactive apis / operators are highly declarative
+
+
+package com.ibm.reative;
+
+import io.smallrye.mutiny.Uni;
+
+public class FirstMutiny {
+    public static void main(String[] args) {
+        //Uni
+        String dataSource ="Hello Muntiny";
+        Uni.createFrom()
+                .item(dataSource) //data source
+                .onItem().transform(item -> item) //trigger event - data event //up stream
+                .onItem().transform(item->item.toUpperCase())  // down stream
+                .subscribe().with(data -> System.out.println(data), err -> System.out.println(err));
+    }
+}
+
+
+package com.ibm.reative;
+
+import io.smallrye.mutiny.Uni;
+
+import java.time.Duration;
+
+
+public class UniDelay {
+    public static void main(String[] args) {
+        System.out.println("start");
+        Uni.createFrom().item(1)
+                .onItem().transform(i -> "hello-" + i)
+                .onItem().delayIt().by(Duration.ofMillis(1000))
+                .subscribe().with(System.out::println);
+        System.out.println("end");
+    }
+}
+
+package com.ibm.reative;
+
+import io.smallrye.mutiny.Uni;
+
+import java.time.Duration;
+
+public class UniErrors {
+
+    public static String fallback() {
+        return "data from caching server";
+    }
+
+    public static String mybizlogic() {
+        String something = "I have data";
+        boolean foundError = true;
+        if (foundError) {
+            System.out.println("method is called in error state");
+             throw new RuntimeException("Boom");
+        }
+        return something;
+    }
+
+    public static void main(String[] args) {
+        Uni.createFrom()
+                .item(UniErrors::mybizlogic)
+                .onItem().transform(d -> d.toUpperCase())
+                .onItem().transform(d -> d.replace(" ", "--"))
+                .onFailure().retry().atMost(4)
+                .onFailure().recoverWithItem(UniErrors::fallback)
+                .subscribe().with((item) -> System.out.println(item), err -> System.out.println(err.getMessage()));
+
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Quarkus And Muntiny:
+
+Quarkus and Muntiny helps to build async reactive microservices.
+
+
+A quick glance at the Quarkus engine and how it enables reactive
+
+A brief introduction to Mutiny - the reactive programming library used by Quarkus
+
+The difference between RESTEasy, RESTEasy Reactive and Reactive Routes
+
+The bootstrap of a reactive application using RESTEasy Reactive
+
+Creating a reactive JAX-RS endpoint (asynchronous, streams…​)
+
+Using reactive database access
+
+Interacting with other reactive APIs
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+Quarkus Application code:
+
+1.Non Blocking code which runs on vertx engine : Event loop threads
+2.Blocking code is running Vertx engine on special threads "Worker pool threads".
+
+In Quarkus world
+
+1.declarative code is running event loop thread
+2.imperative code  is running on work loop thread
+
+
+How to start working with Reactive Quarkus?
+
+YOu need to add Reactive extension libs
+
+quarkus-resteasy-reactive
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+Web Routing:
+
+1.JAX-RS - RESTEASY Implementation
+
+2.Vert.x  -  functional style.
+
+
+3.Mixing Vertx and Quarkus style
+
+  -annotation style
+  -pure functional style
+
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+
+import io.vertx.ext.web.Router;
+
+@ApplicationScoped
+public class MyRouteRegistar {
+
+    public void init(@Observes Router router) {
+        router.get("/my-route").handler(rc -> rc.response().end("Hello from my route"));
+    }
+
+}
+ 
+
+Declarative:
+package org.acme.reactive.routes;
+
+import javax.enterprise.context.ApplicationScoped;
+
+import io.quarkus.vertx.web.Route;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.web.RoutingContext;
+
+@ApplicationScoped
+public class MyDeclarativeRoutes {
+
+    @Route(path = "/", methods = HttpMethod.GET)
+    public void handle(RoutingContext rc) {
+        rc.response().end("hello");
+    }
+
+    @Route(path = "/hello", methods = HttpMethod.GET)
+    public void greetings(RoutingContext rc) {
+        String name = rc.request().getParam("name");
+        if (name == null) {
+            name = "world";
+        }
+        rc.response().end("hello " + name);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Micro services Management patterns and relience patterns
+  -SmallRye Implementations
+
+Quarkus implements SmallyRye projects for implementing "MicroProfile Microservices spec"
+
+
+1.Loggers
+
+2.Fault Management
+
+3.Health
+
+4.Open Tracing
+
+5.Micro Meter
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Falut Tolerance:
+
+  Something went wrong inside application, how to handle it an how to react it.
+
+
+
+SmallRye Fault Tolerance
+
+An implementation of MicroProfile Fault Tolerance
+
+
+
+
+Fault Tolerance provides developers with the following strategies for dealing with failure:
+
+Timeout: Define a maximum duration for execution
+
+Retry: Attempt execution again if it fails
+
+Bulkhead: Limit concurrent execution so that failures in that area can’t overload the whole system
+
+CircuitBreaker: Automatically fail fast when execution repeatedly fails
+
+Fallback: Provide an alternative solution when execution fails
+
+
+mvn io.quarkus:quarkus-maven-plugin:1.13.7.Final:create \
+    -DprojectGroupId=org.acme \
+    -DprojectArtifactId=microprofile-fault-tolerance-quickstart \
+    -DclassName="org.acme.microprofile.faulttolerance.CoffeeResource" \
+    -Dpath="/coffee" \
+    -Dextensions="resteasy,smallrye-fault-tolerance,resteasy-jackson"
+cd microprofile-fault-tolerance-quickstart
+
+
+
+Timemout:
+
+    @GET
+    @Path("/{id}/recommendations")
+    @Timeout(250)
+    @Fallback(fallbackMethod = "fallbackRecommendations")
+    public List<Coffee> recommendations(@PathParam int id) {
+        long started = System.currentTimeMillis();
+        final long invocationNumber = counter.getAndIncrement();
+
+        try {
+            randomDelay();
+            LOGGER.infof("CoffeeResource#recommendations() invocation #%d returning successfully", invocationNumber);
+            return coffeeRepository.getRecommendations(id);
+        } catch (InterruptedException e) {
+            LOGGER.errorf("CoffeeResource#recommendations() invocation #%d timed out after %d ms",
+                    invocationNumber, System.currentTimeMillis() - started);
+            return null;
+        }
+    }
+
+    private void randomDelay() throws InterruptedException {
+        // introduce some artificial delay
+        Thread.sleep(new Random().nextInt(500));
+    }
+
+   /**
+     * A fallback method for recommendations.
+     */
+    public List<Coffee> fallbackRecommendations(int id) {
+        LOGGER.info("Falling back to RecommendationResource#fallbackRecommendations()");
+        // safe bet, return something that everybody likes
+        return Collections.singletonList(coffeeRepository.getCoffeeById(1));
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+Retry: Attempt execution again if it fails
+
+ To avoid fail fast, give chance to get life.
+
+if service throws exception, we dont want to send error immediately, rather we try for some time.
+
+     *
+     * This method fails about 50% of time. However, in case of a failure, the method is automatically re-invoked again
+     * (up to 4 times), thanks to the {@link Retry} annotation. That means that a user is rarely exposed to a
+     * failure, since the probability of a failure occurring 4 times in row is fairly low.
+     */
+    @GET
+    @Retry(maxRetries = 4, retryOn = RuntimeException.class)
+    public List<Coffee> coffees() {
+        final Long invocationNumber = counter.getAndIncrement();
+
+        maybeFail(String.format("CoffeeResource#coffees() invocation #%d failed", invocationNumber));
+
+        LOGGER.infof("CoffeeResource#coffees() invocation #%d returning successfully", invocationNumber);
+        return coffeeRepository.getAllCoffees();
+    }
+
+private void maybeFail(String failureLogMessage) {
+        // introduce some artificial failures
+        if (new Random().nextFloat() < failRatio) {
+            LOGGER.error(failureLogMessage);
+            throw new RuntimeException("Resource failure.");
+        }
+    }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+Bulkhead: 
+
+   Limit concurrent execution so that failures in that area can’t overload the whole system
+
+  //only 10 threads/ 10 concurrent users can access this api
+    @GET
+    @Path("/bulk")
+    @Bulkhead(value = 10)
+    public Response dontOverload() {
+        return Response.ok("bulk").build();
+    }
+///////////////////////////////////////////////////////////////////////////////////////////
+
+CircuitBreaker: 
+   Automatically fail fast when execution repeatedly fails
+
+states
+-open  - if something went wrong, cb starts fails fast
+-half open - trying to recorver from open and closed
+-closed - application running fine.
+
+
+ App running--got error------open---|trips--- half open----closed or open
+
+@Path("/{id}/availability")
+    @GET
+    public Response availability(@PathParam int id) {
+        final Long invocationNumber = counter.getAndIncrement();
+
+        Coffee coffee = coffeeRepository.getCoffeeById(id);
+
+        // check that coffee with given id exists, return 404 if not
+        if (coffee == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        try {
+            Integer availability = coffeeRepository.getAvailability(coffee);
+            LOGGER.infof("CoffeeResource#availability() invocation #%d returning successfully", invocationNumber);
+            return Response.ok(availability).build();
+        } catch (RuntimeException e) {
+            String message = e.getClass().getSimpleName() + ": " + e.getMessage();
+            LOGGER.errorf("CoffeeResource#availability() invocation #%d failed: %s", invocationNumber, message);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(message)
+                    .build();
+        }
+    }
+  @CircuitBreaker(requestVolumeThreshold = 4)
+    public Integer getAvailability(Coffee coffee) {
+        maybeFail();
+        return availability.get(coffee.id);
+    }
+
+ private void maybeFail() {
+        // introduce some artificial failures
+        final Long invocationNumber = counter.getAndIncrement();
+        if (invocationNumber % 4 > 1) { // alternate 2 successful and 2 failing invocations
+            LOGGER.errorf("Invocation #%d failing", invocationNumber);
+            throw new RuntimeException("Service failed.");
+        }
+        LOGGER.infof("Invocation #%d OK", invocationNumber);
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////
+3.Health :
+
+Health checks are used to probe the state of a computing node from another machine (i.e. kubernetes service controller) with the primary target being cloud infrastructure environments where automated processes maintain the state of computing nodes.
+
+In this scenario, health checks are used to determine if a computing node needs to be discarded (terminated, shutdown) and eventually replaced by another (healthy) instance.
+
+It’s not intended (although could be used) as a monitoring solution for human operators.
+
+
+@FunctionalInterface
+public interface HealthCheck {
+
+    HealthCheckResponse call();
+}
+
+QUARKUS - SMALLRYE HEALTH
+
+/q/health/live - The application is up and running.
+
+/q/health/ready - The application is ready to serve requests.
+
+/q/health - Accumulating all health check procedures in the application.
+
+public class HealthCheckResponse {
+
+    public enum Status { UP, DOWN }
+
+    private final String name;
+
+    private final Status status;
+
+    private final Optional<Map<String, Object>> data;
+
+    [...]
+}
+
+Readiness checks defined with @Readiness annotation
+
+Liveness checks defined with @Liveness annotation
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+MicroProfile OpenTracing:
+
+  The MicroProfile OpenTracing specification defines behaviors and an API for accessing an OpenTracing compliant Tracer object within your JAX-RS application. The behaviors specify how incoming and outgoing requests will have OpenTracing Spans automatically created. The API defines how to explicitly disable or enable tracing for given endpoints.
+
+
+Micro Meter with Promothus
+..............................................................................................
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
